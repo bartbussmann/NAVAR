@@ -1,11 +1,11 @@
 import torch
 import numpy as np
 from dataloader import DataLoader
-from NAVAR import NAVAR
+from NAVAR import NAVAR, NAVARLSTM
 
 def train_NAVAR(data, maxlags=5, hidden_nodes=256, dropout=0, epochs=200, learning_rate=1e-4,
                           batch_size=300, lambda1=0, val_proportion=0.0,  weight_decay=0,
-                          check_every=1000, hidden_layers=1, normalize=True, split_timeseries=False ):
+                          check_every=1000, hidden_layers=1, normalize=True, split_timeseries=False, lstm=False):
     """
     Trains a Neural Additive Vector Autoregression (NAVAR) model on time series data and scores the
     potential causal links between variables.
@@ -40,6 +40,8 @@ def train_NAVAR(data, maxlags=5, hidden_nodes=256, dropout=0, epochs=200, learni
         split_timeseries: int
             If the original time series consists of multiple shorter time series, this argument should indicate the
             original time series length. Otherwise should be zero.
+        lstm: bool
+            Indicates whether we should use the LSTM model (instead of MLP).
 
     Returns:
         causal_matrix: ndarray
@@ -57,7 +59,10 @@ def train_NAVAR(data, maxlags=5, hidden_nodes=256, dropout=0, epochs=200, learni
     T, N = data.shape
 
     # initialize the NAVAR model
-    model = NAVAR(N, hidden_nodes, maxlags, dropout=dropout, hidden_layers=hidden_layers)
+    if lstm:
+        model = NAVARLSTM(N, hidden_nodes, maxlags, dropout=dropout, hidden_layers=hidden_layers)
+    else:
+        model = NAVAR(N, hidden_nodes, maxlags, dropout=dropout, hidden_layers=hidden_layers)
 
     # use Mean Squared Error and the Adam optimzer
     criterion = torch.nn.MSELoss(reduction='mean')
