@@ -18,10 +18,10 @@ Python >= 3.5 is required.
 In order to reproduce the experiments on the DREAM3 dataset use the following command:
 
 ```bash
-python run_dream_experiments.py --experiment experiment_name --evaluate
+python run_dream_experiments.py --experiment experiment_name --evaluate --lstm
 ```
 
-The experiment names are `ecoli1`, `ecoli2`, `yeast1`, `yeast2`, and `yeast3`. The `--evaluate` flag makes sure the score matrix is compared to the ground truth, and the AUROC is printed. 
+The experiment names are `ecoli1`, `ecoli2`, `yeast1`, `yeast2`, and `yeast3`. The `--lstm` flag indicated whether you want to use the lstm model or not. The `--evaluate` flag makes sure the score matrix is compared to the ground truth, and the AUROC is printed. 
 
 ### CauseMe experiments
 In order to reproduce the experiments from the CauseMe platform use the following command:

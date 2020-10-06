@@ -3,11 +3,11 @@ import numpy as np
 
 class DataLoader(object):
 
-    def __init__(self, data, maxlags, normalize=True,  val_proportion=0.1, split_timeseries=False):
-        self.all_Xs, self.all_Ys = self.prepare_data(data, maxlags, normalize, split_timeseries)
+    def __init__(self, data, maxlags, normalize=True,  val_proportion=0.1, split_timeseries=False, lstm=False):
+        self.all_Xs, self.all_Ys = self.prepare_data(data, maxlags, normalize, split_timeseries, lstm=lstm)
         self.train_Xs, self.train_Ys, self.val_Xs, self.val_Ys = self.split_train_val(val_proportion)
 
-    def prepare_data(self, data, maxlags, normalize, split_timeseries=False):
+    def prepare_data(self, data, maxlags, normalize, split_timeseries=False, lstm=False):
         """
         Prepares multivariate time series data such that it can be used by a NAVAR model
 
@@ -35,28 +35,43 @@ class DataLoader(object):
         if normalize:
             data = data / torch.std(data, dim=0)
             data = data - data.mean(dim=0)
+        
+        if not lstm:
+            # initialize our input and target variables
+            X = torch.zeros((T - maxlags, maxlags, N))
+            Y = torch.zeros((T - maxlags, N))
 
-        # initialize our input and target variables
-        X = torch.zeros((T - maxlags, maxlags, N))
-        Y = torch.zeros((T - maxlags, N))
+            # X consists of the past K values of Y
+            for i in range(T - maxlags - 1):
+                X[i, :, :] = data[i:i + maxlags, :]
+                Y[i, :] = data[i + maxlags, :]
 
-        # X consists of the past K values of Y
-        for i in range(T - maxlags - 1):
-            X[i, :, :] = data[i:i + maxlags, :]
-            Y[i, :] = data[i + maxlags, :]
+            # if the data originated from multiple smaller time series, we make sure not to predict over the boundaries.
+            if split_timeseries:
+                rows_to_be_kept = []
+                for x in range(0, X.shape[0]):
+                    to_be_deleted = sum([(x + maxlags - y) % split_timeseries == 0 for y in range(maxlags)]) > 0
+                    if not to_be_deleted:
+                        rows_to_be_kept.append(x)
+                rows_to_be_kept = np.asarray(rows_to_be_kept)
+                X = X[rows_to_be_kept]
+                Y = Y[rows_to_be_kept]
 
-        # if the data originated from multiple smaller time series, we make sure not to predict over the boundaries.
-        if split_timeseries:
-            rows_to_be_kept = []
-            for x in range(0, X.shape[0]):
-                to_be_deleted = sum([(x + maxlags - y) % split_timeseries == 0 for y in range(maxlags)]) > 0
-                if not to_be_deleted:
-                    rows_to_be_kept.append(x)
-            rows_to_be_kept = np.asarray(rows_to_be_kept)
-            X = X[rows_to_be_kept]
-            Y = Y[rows_to_be_kept]
-
-        X = X.permute(0, 2, 1)
+            X = X.permute(0, 2, 1)
+            
+        else:
+            # initialize our input and target variables
+            X = torch.zeros((int(T/maxlags), maxlags, N))
+            
+            # X and Y consist of timeseries of length K
+            for i in range(int(T/maxlags) -1):
+                X[i, :, :] = data[i*maxlags:(i+1)*maxlags, :]
+            X = X.permute(0, 2, 1)
+            X.view(-1, N, maxlags)
+            Y = X[:,:,1:]
+            X = X[:,:,:-1]
+            
+            
         return X, Y
 
     def split_train_val(self, val_proportion):

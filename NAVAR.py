@@ -42,7 +42,7 @@ class NAVAR(nn.Module):
 
         contributions = self.contributions(hidden)
         contributions = contributions.view([-1, self.num_nodes, self.num_nodes, 1])
-        predictions = torch.sum(contributions, dim=1).squeeze() + self.biases
+        predictions = torch.sum(contributions, dim=1).squeeze() #+ self.biases
         contributions = contributions.view([-1, self.num_nodes*self.num_nodes, 1]).squeeze()
         return predictions, contributions
 
@@ -76,11 +76,9 @@ class NAVARLSTM(nn.Module):
         self.biases = nn.Parameter(torch.ones(1, num_nodes) * 0.0001)
 
     def forward(self, x):
-        # we initialize an empty tensor to store the contributions
-        contributions = torch.zeros((x.shape[0], self.num_nodes*self.num_nodes))
-        if x.is_cuda:
-            contributions = contributions.cuda()
-
+        batch_size, number_of_nodes, time_series_length = x.shape
+        contributions = torch.zeros((batch_size, self.num_nodes*self.num_nodes, time_series_length)).cuda()
+       
         # we split the input into the components
         x = x.split(1, dim=1)
 
@@ -90,10 +88,10 @@ class NAVARLSTM(nn.Module):
             lstm = self.lstm_list[node]
             fc = self.fc_list[node]
             lstm_output, _ = lstm(model_input)
-            contributions[:, node*self.num_nodes:(node+1)*self.num_nodes] = fc(lstm_output[:, -1, :])
+            contributions[:, node*self.num_nodes:(node+1)*self.num_nodes, :] = fc(lstm_output).transpose(1,2)
 
-        contributions = contributions.view([-1, self.num_nodes, self.num_nodes, 1])
-        predictions = torch.sum(contributions, dim=1).squeeze() + self.biases
+        contributions = contributions.view([batch_size, self.num_nodes, self.num_nodes, time_series_length])
+        predictions = torch.sum(contributions, dim=1) + self.biases.transpose(0,1)
         contributions = contributions.view([-1, self.num_nodes*self.num_nodes, 1]).squeeze()
         return predictions, contributions
         

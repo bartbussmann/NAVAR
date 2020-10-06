@@ -69,7 +69,7 @@ def train_NAVAR(data, maxlags=5, hidden_nodes=256, dropout=0, epochs=200, learni
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate, weight_decay=weight_decay)
 
     # obtain the training and validation data
-    dataset = DataLoader(data, maxlags, normalize=normalize, val_proportion=val_proportion, split_timeseries=split_timeseries)
+    dataset = DataLoader(data, maxlags, normalize=normalize, val_proportion=val_proportion, split_timeseries=split_timeseries, lstm=lstm)
     X_train, Y_train = dataset.train_Xs, dataset.train_Ys
     X_val, Y_val = dataset.val_Xs, dataset.val_Ys
     # push model and data to GPU if available
@@ -88,21 +88,24 @@ def train_NAVAR(data, maxlags=5, hidden_nodes=256, dropout=0, epochs=200, learni
     # start of training loop
     for t in range(epochs +1):
         #obtain batches
+        batch_indeces_list = []
         if batch_size < num_training_samples:
-            batch_indeces_list = []
             batch_perm = np.random.choice(num_training_samples, size=num_training_samples, replace=False)
             for i in range(int(num_training_samples/batch_size) + 1):
                 start = i*batch_size
                 batch_i = batch_perm[start:start+batch_size]
                 if len(batch_i) > 1:
                     batch_indeces_list.append(batch_perm[start:start+batch_size])
+#         elif lstm:
+#             for i in range(int(num_training_samples/maxlags)):
+#                 batch_indeces_list.append(np.arange(i*maxlags, (i+1)*maxlags))
         else:
             batch_indeces_list = [np.arange(num_training_samples)]
 
         for counter, batch_indeces in enumerate(batch_indeces_list):
             X_batch = X_train[batch_indeces]
             Y_batch = Y_train[batch_indeces]
-
+            
             # forward pass to calculate predictions and contributions
             predictions, contributions = model(X_batch)
 
@@ -120,12 +123,16 @@ def train_NAVAR(data, maxlags=5, hidden_nodes=256, dropout=0, epochs=200, learni
         # every 'check_every' epochs we calculate and print the validation loss
         if t % check_every == 0 and t != 0:
             model.eval()
+#             if lstm:
+#                 X_val_i = X_val.view(-1, N, maxlags)
+#                 Y_val = X_val[:,:,1:]
+#                 X_val = X_val[:,:,:-1]
             if val_proportion > 0.0:
                 val_pred, val_contributions = model(X_val)
                 loss_val = criterion(val_pred, Y_val)
             model.train()
 
-            print(f'iteration {t}. Loss: {total_loss/counter}  Val loss: {loss_val}')
+            print(f'iteration {t}. Loss: {total_loss/(counter +1)}  Val loss: {loss_val}')
             total_loss = 0
 
     # use the trained model to calculate the causal scores

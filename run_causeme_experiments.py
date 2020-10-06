@@ -59,7 +59,7 @@ elif experiment == 'TestCLIM_N-40_T-250':
     hl = 1
     maxlags = 2
 
-elif experiment == 'TestWEATH_N-20_T-2000':
+elif experiment == 'TestWEATH_N-10_T-2000':
     lambda1 = 0.0560
     batch_size = 64
     wd = 4.903e-3
@@ -95,7 +95,7 @@ with zipfile.ZipFile(file, "r") as zip_ref:
         print(f"Training NAVAR on: {dataset}")
         data = np.loadtxt(zip_ref.open(dataset))
         # start training NAVAR
-        score_matrix, _, _ = train_NAVAR(data, maxlags=maxlags, hidden_nodes=hidden_nodes, dropout=0, epochs=2000,
+        score_matrix, _, _ = train_NAVAR(data, maxlags=maxlags, hidden_nodes=hidden_nodes, dropout=0, epochs=5000,
                                          learning_rate=learning_rate, batch_size=batch_size, lambda1=lambda1,
                                          val_proportion=0.0, weight_decay=wd, check_every=500, hidden_layers=hl,
                                          normalize=True, split_timeseries=False)
