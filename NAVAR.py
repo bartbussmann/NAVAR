@@ -76,7 +76,10 @@ class NAVARLSTM(nn.Module):
         self.biases = nn.Parameter(torch.ones(1, num_nodes) * 0.0001)
 
     def forward(self, x):
-        contributions = torch.zeros((x.shape[0], self.num_nodes*self.num_nodes)).cuda()
+        # we initialize an empty tensor to store the contributions
+        contributions = torch.zeros((x.shape[0], self.num_nodes*self.num_nodes))
+        if x.is_cuda:
+            contributions = contributions.cuda()
 
         # we split the input into the components
         x = x.split(1, dim=1)
