@@ -21,6 +21,8 @@ class DataLoader(object):
             split_timeseries: int
                 If the original time series consists of multiple shorter time series, this argument should indicate the
                 original time series length. Otherwise should be zero.
+            lstm: bool
+                Indicates whether we should prepare the data for a LSTM model (or MLP).
         Returns:
             X: Tensor (T - maxlags - 1) x maxlags x N
                 Input for the NAVAR model
@@ -68,8 +70,8 @@ class DataLoader(object):
                 X[i, :, :] = data[i*maxlags:(i+1)*maxlags, :]
             X = X.permute(0, 2, 1)
             X.view(-1, N, maxlags)
-            Y = X[:,:,1:]
-            X = X[:,:,:-1]
+            Y = X[:, :, 1:]
+            X = X[:, :, :-1]
             
             
         return X, Y

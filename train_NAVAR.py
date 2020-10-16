@@ -96,9 +96,6 @@ def train_NAVAR(data, maxlags=5, hidden_nodes=256, dropout=0, epochs=200, learni
                 batch_i = batch_perm[start:start+batch_size]
                 if len(batch_i) > 1:
                     batch_indeces_list.append(batch_perm[start:start+batch_size])
-#         elif lstm:
-#             for i in range(int(num_training_samples/maxlags)):
-#                 batch_indeces_list.append(np.arange(i*maxlags, (i+1)*maxlags))
         else:
             batch_indeces_list = [np.arange(num_training_samples)]
 
@@ -123,10 +120,6 @@ def train_NAVAR(data, maxlags=5, hidden_nodes=256, dropout=0, epochs=200, learni
         # every 'check_every' epochs we calculate and print the validation loss
         if t % check_every == 0 and t != 0:
             model.eval()
-#             if lstm:
-#                 X_val_i = X_val.view(-1, N, maxlags)
-#                 Y_val = X_val[:,:,1:]
-#                 X_val = X_val[:,:,:-1]
             if val_proportion > 0.0:
                 val_pred, val_contributions = model(X_val)
                 loss_val = criterion(val_pred, Y_val)

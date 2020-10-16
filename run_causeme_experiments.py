@@ -40,7 +40,6 @@ elif experiment == 'nonlinear-VAR_N-10_T-300':
     hl = 1
     maxlags = 5
 
-
 elif experiment == 'nonlinear-VAR_N-20_T-300':
     lambda1 = 0.2434
     batch_size = 64
@@ -68,13 +67,12 @@ elif experiment == 'TestWEATH_N-10_T-2000':
     hl = 1
     maxlags = 5
 
-
 elif experiment == 'river-runoff_N-12_T-4600':
-    lambda1 = 0.1760
-    batch_size = 128
-    wd = 4.749e-7
-    hidden_nodes = 64
-    learning_rate = 0.0002
+    lambda1 = 0.1708744133515745
+    batch_size = 256
+    wd = 0.0005092700042638143
+    hidden_nodes = 8
+    learning_rate = 0.0001
     hl = 1
     maxlags = 5
 
