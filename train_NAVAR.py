@@ -125,7 +125,7 @@ def train_NAVAR(data, maxlags=5, hidden_nodes=256, dropout=0, epochs=200, learni
                 loss_val = criterion(val_pred, Y_val)
             model.train()
 
-            print(f'iteration {t}. Loss: {total_loss/t}  Val loss: {loss_val}')
+            print(f'iteration {t}. Loss: {total_loss/check_every}  Val loss: {loss_val}')
             total_loss = 0
 
     # use the trained model to calculate the causal scores
