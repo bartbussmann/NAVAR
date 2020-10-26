@@ -86,7 +86,7 @@ def train_NAVAR(data, maxlags=5, hidden_nodes=256, dropout=0, epochs=200, learni
     loss_val = 0
 
     # start of training loop
-    for t in range(epochs +1):
+    for t in range(1, epochs +1):
         #obtain batches
         batch_indeces_list = []
         if batch_size < num_training_samples:
@@ -94,7 +94,7 @@ def train_NAVAR(data, maxlags=5, hidden_nodes=256, dropout=0, epochs=200, learni
             for i in range(int(num_training_samples/batch_size) + 1):
                 start = i*batch_size
                 batch_i = batch_perm[start:start+batch_size]
-                if len(batch_i) > 1:
+                if len(batch_i) > 0:
                     batch_indeces_list.append(batch_perm[start:start+batch_size])
         else:
             batch_indeces_list = [np.arange(num_training_samples)]
@@ -118,14 +118,14 @@ def train_NAVAR(data, maxlags=5, hidden_nodes=256, dropout=0, epochs=200, learni
             optimizer.step()
 
         # every 'check_every' epochs we calculate and print the validation loss
-        if t % check_every == 0 and t != 0:
+        if t % check_every == 0:
             model.eval()
             if val_proportion > 0.0:
                 val_pred, val_contributions = model(X_val)
                 loss_val = criterion(val_pred, Y_val)
             model.train()
 
-            print(f'iteration {t}. Loss: {total_loss/(counter +1)}  Val loss: {loss_val}')
+            print(f'iteration {t}. Loss: {total_loss/t}  Val loss: {loss_val}')
             total_loss = 0
 
     # use the trained model to calculate the causal scores
