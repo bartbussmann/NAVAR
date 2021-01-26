@@ -86,6 +86,7 @@ def train_NAVAR(data, maxlags=5, hidden_nodes=256, dropout=0, epochs=200, learni
     loss_val = 0
 
     # start of training loop
+    batch_counter = 0
     for t in range(1, epochs +1):
         #obtain batches
         batch_indeces_list = []
@@ -99,7 +100,8 @@ def train_NAVAR(data, maxlags=5, hidden_nodes=256, dropout=0, epochs=200, learni
         else:
             batch_indeces_list = [np.arange(num_training_samples)]
 
-        for counter, batch_indeces in enumerate(batch_indeces_list):
+        for batch_indeces in batch_indeces_list:
+            batch_counter += 1
             X_batch = X_train[batch_indeces]
             Y_batch = Y_train[batch_indeces]
             
@@ -125,8 +127,9 @@ def train_NAVAR(data, maxlags=5, hidden_nodes=256, dropout=0, epochs=200, learni
                 loss_val = criterion(val_pred, Y_val)
             model.train()
 
-            print(f'iteration {t}. Loss: {total_loss/check_every}  Val loss: {loss_val}')
+            print(f'iteration {t}. Loss: {total_loss/batch_counter}  Val loss: {loss_val}')
             total_loss = 0
+            batch_counter = 0
 
     # use the trained model to calculate the causal scores
     model.eval()
