@@ -37,7 +37,7 @@ check_every = int(epochs/10)
 
 # load the data
 data = pd.read_csv(filename, sep=',')
-data = data.values[:, 1:]
+data = data.values
 
 # start training
 print(f"Starting training on the data from experiment {filename}, training for {epochs} iterations.")
