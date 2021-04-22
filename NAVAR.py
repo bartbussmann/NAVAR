@@ -1,6 +1,7 @@
 import torch.nn as nn
 import torch
 
+
 class NAVAR(nn.Module):
     def __init__(self, num_nodes, num_hidden, maxlags, hidden_layers=1, dropout=0):
         """
@@ -22,7 +23,7 @@ class NAVAR(nn.Module):
         self.num_nodes = num_nodes
         self.num_hidden = num_hidden
         self.first_hidden_layer = nn.Conv1d(num_nodes, num_hidden * num_nodes, kernel_size=maxlags,
-                                                  groups=num_nodes)
+                                            groups=num_nodes)
         self.dropout = nn.Dropout(p=dropout)
         self.hidden_layer_list = nn.ModuleList()
         self.dropout_list = nn.ModuleList()
@@ -42,9 +43,10 @@ class NAVAR(nn.Module):
 
         contributions = self.contributions(hidden)
         contributions = contributions.view([-1, self.num_nodes, self.num_nodes, 1])
-        predictions = torch.sum(contributions, dim=1).squeeze() #+ self.biases
-        contributions = contributions.view([-1, self.num_nodes*self.num_nodes, 1]).squeeze()
+        predictions = torch.sum(contributions, dim=1).squeeze() + self.biases
+        contributions = contributions.view([-1, self.num_nodes * self.num_nodes, 1])
         return predictions, contributions
+
 
 class NAVARLSTM(nn.Module):
     def __init__(self, num_nodes, num_hidden, maxlags, hidden_layers=1, dropout=0):
@@ -77,8 +79,8 @@ class NAVARLSTM(nn.Module):
 
     def forward(self, x):
         batch_size, number_of_nodes, time_series_length = x.shape
-        contributions = torch.zeros((batch_size, self.num_nodes*self.num_nodes, time_series_length)).cuda()
-       
+        contributions = torch.zeros((batch_size, self.num_nodes * self.num_nodes, time_series_length)).cuda()
+
         # we split the input into the components
         x = x.split(1, dim=1)
 
@@ -88,11 +90,12 @@ class NAVARLSTM(nn.Module):
             lstm = self.lstm_list[node]
             fc = self.fc_list[node]
             lstm_output, _ = lstm(model_input)
-            contributions[:, node*self.num_nodes:(node+1)*self.num_nodes, :] = fc(lstm_output).transpose(1,2)
+            contributions[:, node * self.num_nodes:(node + 1) * self.num_nodes, :] = fc(lstm_output).transpose(1, 2)
 
         contributions = contributions.view([batch_size, self.num_nodes, self.num_nodes, time_series_length])
-        predictions = torch.sum(contributions, dim=1) + self.biases.transpose(0,1)
-        contributions = contributions.view([-1, self.num_nodes*self.num_nodes, 1]).squeeze()
+        predictions = torch.sum(contributions, dim=1) + self.biases.transpose(0, 1)
+        contributions = contributions.permute(0, 3, 1, 2)
+        contributions = contributions.reshape(-1, self.num_nodes * self.num_nodes, 1)
         return predictions, contributions
-        
+
 
