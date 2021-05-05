@@ -79,7 +79,9 @@ class NAVARLSTM(nn.Module):
 
     def forward(self, x):
         batch_size, number_of_nodes, time_series_length = x.shape
-        contributions = torch.zeros((batch_size, self.num_nodes * self.num_nodes, time_series_length)).cuda()
+        contributions = torch.zeros((batch_size, self.num_nodes * self.num_nodes, time_series_length))
+        if torch.cuda.is_available():
+            contributions = contributions.cuda()
 
         # we split the input into the components
         x = x.split(1, dim=1)
@@ -97,5 +99,3 @@ class NAVARLSTM(nn.Module):
         contributions = contributions.permute(0, 3, 1, 2)
         contributions = contributions.reshape(-1, self.num_nodes * self.num_nodes, 1)
         return predictions, contributions
-
-
