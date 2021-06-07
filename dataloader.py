@@ -62,17 +62,30 @@ class DataLoader(object):
             X = X.permute(0, 2, 1)
             
         else:
-            # initialize our input and target variables
-            X = torch.zeros((int(T/maxlags), maxlags, N))
-            
-            # X and Y consist of timeseries of length K
-            for i in range(int(T/maxlags) -1):
-                X[i, :, :] = data[i*maxlags:(i+1)*maxlags, :]
-            X = X.permute(0, 2, 1)
-            X.view(-1, N, maxlags)
-            Y = X[:, :, 1:]
-            X = X[:, :, :-1]
-            
+            if split_timeseries:
+                # initialize our input and target variables
+                X = torch.zeros((int(T/split_timeseries), split_timeseries, N))
+
+                # X and Y consist of timeseries of length K
+                for i in range(int(T/split_timeseries) -1):
+                    X[i, :, :] = data[i*split_timeseries:(i+1)*split_timeseries, :]
+                X = X.permute(0, 2, 1)
+                X.view(-1, N, split_timeseries)
+                Y = X[:, :, 1:]
+                X = X[:, :, :-1]
+            else:
+                # initialize our input and target variables
+                X = torch.zeros((T, maxlags + 1, N))
+
+                # X and Y consist of timeseries of length K
+                for i in range(int(T)):
+                    for counter, j in enumerate(range(maxlags + 1, 0, -1)):
+                        if i - j >= 0:
+                            X[i, counter, :] = data[i - j, :]
+                X = X.permute(0, 2, 1)
+                X.view(-1, N, maxlags+1)
+                Y = X[:, :, 1:]
+                X = X[:, :, :-1]
             
         return X, Y
 

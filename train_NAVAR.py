@@ -109,7 +109,10 @@ def train_NAVAR(data, maxlags=5, hidden_nodes=256, dropout=0, epochs=200, learni
             predictions, contributions = model(X_batch)
 
             # calculate the loss
-            loss_pred = criterion(predictions, Y_batch)
+            if not lstm and not split_timeseries:
+                loss_pred = criterion(predictions, Y_batch)
+            else:
+                loss_pred = criterion(predictions[:,:,-1], Y_batch[:,:,-1])
             loss_l1 = (lambda1/N) * torch.mean(torch.sum(torch.abs(contributions), dim=1))
             loss = loss_pred + loss_l1
             total_loss += loss
