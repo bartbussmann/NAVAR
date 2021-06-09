@@ -138,8 +138,8 @@ elif experiment == 'river-runoff_N-12_T-4600':
 results = {}
 results["method_sha"] = method_sha
 results["parameter_values"] = f'maxlags: {maxlags}'
-results['model'] = "NAVAR"
-results['experiment'] = results['model'] + '_' + experiment
+results['model'] = experiment.split('_')[0]
+results['experiment'] = experiment
 results_file = f'results/{experiment}.json.bz2'
 scores = []
 
