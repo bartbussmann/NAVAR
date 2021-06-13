@@ -126,6 +126,15 @@ elif experiment == 'TestWEATH_N-10_T-2000':
         maxlags = 5
 
 elif experiment == 'river-runoff_N-12_T-4600':
+    if lstm:
+        lambda1 = 0.054430975523470315
+        batch_size = 128
+        wd = 4.465e-4
+        hidden_nodes = 128
+        learning_rate = 0.001
+        hl = 1
+        maxlags = 5
+    else:
         lambda1 = 0.1708744133515745
         batch_size = 256
         wd = 0.0005092700042638143
@@ -138,8 +147,8 @@ elif experiment == 'river-runoff_N-12_T-4600':
 results = {}
 results["method_sha"] = method_sha
 results["parameter_values"] = f'maxlags: {maxlags}'
-results['model'] = "NAVAR"
-results['experiment'] = results['model'] + '_' + experiment
+results['model'] = experiment.split('_')[0]
+results['experiment'] = experiment
 results_file = f'results/{experiment}.json.bz2'
 scores = []
 

@@ -1,10 +1,6 @@
 # NAVAR
 
-Code for Neural Additive Vector Autoregression Models for Causal Discovery in Time Series Data. If you use this code please cite the following paper:
-
-```
-Bussmann, Bart, Jannes Nys, and Steven Latré. "Neural Additive Vector Autoregression Models for Causal Discovery in Time Series Data." arXiv preprint arXiv:2010.09429 (2020).
-```
+Code for Neural Additive Vector Autoregression Models for Causal Discovery in Time Series Data ([Paper](paper/Neural_Additive_Vector_Autoregression_Models_for_Causal_Discovery_in_Time_Series.pdf), [Supplementary Material](paper/Supplementary_Material.pdf)).
 
 ## Installation
 
