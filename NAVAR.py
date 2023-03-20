@@ -35,7 +35,7 @@ class NAVAR(nn.Module):
         self.biases = nn.Parameter(torch.ones(1, num_nodes) * 0.0001)
 
     def forward(self, x):
-        hidden = self.first_hidden_layer(x).clamp(min=0).view([-1, self.num_nodes, self.num_hidden])
+        hidden = self.first_hidden_layer(x).clamp(min=0).transpose(-1, -2).reshape([-1, self.num_nodes, self.num_hidden])
         hidden = self.dropout(hidden)
         for i in range(len(self.hidden_layer_list)):
             hidden = self.hidden_layer_list[i](hidden).clamp(min=0).view([-1, self.num_nodes, self.num_hidden])
